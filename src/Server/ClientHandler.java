@@ -17,9 +17,7 @@ public class ClientHandler {
             this.socket = socket;
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
-            new Thread(new Runnable(){
-                @Override
-                public void  run() {
+            new Thread(()->{
                     try {
                         while (true) {
                             String str = in.readUTF();
@@ -33,14 +31,13 @@ public class ClientHandler {
                         e.printStackTrace();
                     } finally {
                         System.out.println("Клиент отключился");
+                        server.unsubscribe(this);
                         try {
                             socket.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
-                }
-
             }).start();
         } catch (Exception e) {
             e.printStackTrace();

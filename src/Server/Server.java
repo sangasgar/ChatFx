@@ -24,7 +24,7 @@ public class Server {
             while (true) {
                 socket = server.accept();
                 System.out.println("Клиент подключился");
-                clients.add(new ClientHandler(this,socket));
+                subscribe(new ClientHandler(this,socket));
             }
 
         } catch (IOException e) {
@@ -32,6 +32,7 @@ public class Server {
         } finally {
             try {
                 server.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -41,5 +42,11 @@ public class Server {
         for (ClientHandler client:clients){
             client.sendMsg (msg);
         }
+    }
+    public void subscribe(ClientHandler clientHandler) {
+        clients.add(clientHandler);
+    }
+    public void unsubscribe(ClientHandler clientHandler) {
+        clients.remove(clientHandler);
     }
 }
