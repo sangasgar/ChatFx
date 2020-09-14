@@ -5,5 +5,5 @@ public interface AuthService {
     @return nickname если пользователь есть
     @return null если пользователя нет
      */
-    String getNickNameByLogicANDPassword(String login,String password);
+    String getNicknameByLoginAndPassword(String login,String password);
 }

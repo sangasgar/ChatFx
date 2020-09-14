@@ -9,14 +9,18 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Vector;
-
 public class Server {
-    List<ClientHandler> clients;
-    private  int PORT = 8189;
+    private List<ClientHandler> clients;
+    private AuthService authService;
+
+    private int PORT = 8189;
     ServerSocket server = null;
     Socket socket = null;
-    public Server () {
+
+    public Server(){
         clients = new Vector<>();
+        authService = new SimpleAuthService();
+
         try {
             server = new ServerSocket(PORT);
             System.out.println("Сервер запущен");
@@ -24,7 +28,8 @@ public class Server {
             while (true) {
                 socket = server.accept();
                 System.out.println("Клиент подключился");
-                subscribe(new ClientHandler(this,socket));
+
+                new ClientHandler(this, socket);
             }
 
         } catch (IOException e) {
@@ -32,21 +37,48 @@ public class Server {
         } finally {
             try {
                 server.close();
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
-    public void broadcastMsg(String msg){
-        for (ClientHandler client:clients){
-            client.sendMsg (msg);
-        }
+
+    public AuthService getAuthService() {
+        return authService;
     }
-    public void subscribe(ClientHandler clientHandler) {
+
+    public void broadcastMsg(ClientHandler sender, String msg){
+
+        String message = String.format(sender.getNickname() + " : " +  msg);
+
+            for (ClientHandler c : clients) {
+                    c.sendMsg(message);
+
+            }
+
+    }
+
+    public void privateMsg(ClientHandler sender, String msg, String res){
+
+        for (ClientHandler c : clients) {
+            if (c.getNickname().equals(res)) {
+                c.sendMsg(sender.getNickname() + " private for " + res + ": " + msg );
+                if(!c.equals(sender)) {
+                    sender.sendMsg(msg);
+                }
+                return;
+            }
+        }
+        sender.sendMsg("Пользователь не найден");
+
+    }
+
+    public void subscribe(ClientHandler clientHandler){
         clients.add(clientHandler);
     }
-    public void unsubscribe(ClientHandler clientHandler) {
+
+    public void unsubscribe(ClientHandler clientHandler){
         clients.remove(clientHandler);
     }
+
 }
