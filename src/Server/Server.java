@@ -64,9 +64,9 @@ public class Server {
             if (c.getNickname().equals(res)) {
                 c.sendMsg(sender.getNickname() + " private for " + res + ": " + msg );
                 if(!c.equals(sender)) {
-                    sender.sendMsg(msg);
+                    sender.sendMsg(sender.getNickname() + " private for " + res + ": " + msg);
                 }
-                return;
+                    return;
             }
         }
         sender.sendMsg("Пользователь не найден");
@@ -75,10 +75,30 @@ public class Server {
 
     public void subscribe(ClientHandler clientHandler){
         clients.add(clientHandler);
+        broadcastClientList();
     }
 
     public void unsubscribe(ClientHandler clientHandler){
         clients.remove(clientHandler);
+        broadcastClientList();
+    }
+    public boolean isLoginAuthenticated(String login) {
+        for (ClientHandler c : clients) {
+            if (c.getLogin().equals(login)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    private void broadcastClientList(){
+        StringBuilder sb = new StringBuilder("/clientlist ");
+        for (ClientHandler c : clients) {
+            sb.append(c.getNickname()).append(" ");
+        }
+        String msg = sb.toString();
+        for (ClientHandler c : clients) {
+           c.sendMsg(msg);
+        }
     }
 
 }
